@@ -541,6 +541,111 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 1500);
   });
 
+  /* ── 10. PROJECT PREVIEW CHARTS ────────────────────── */
+  function initProjCharts() {
+    // Proj 1: Bar chart
+    const c1 = document.getElementById('projChart1')?.getContext('2d');
+    if(c1) {
+      let f = 0;
+      function draw1() {
+        c1.clearRect(0,0,280,130);
+        f += 0.05;
+        for(let i=0; i<12; i++) {
+          const h = 40 + Math.sin(f + i)*30 + (i*5);
+          c1.fillStyle = i > 8 ? '#38bdf8' : 'rgba(56,189,248,0.2)';
+          c1.beginPath();
+          c1.roundRect(10 + i*22, 130 - h, 14, h, [4,4,0,0]);
+          c1.fill();
+        }
+        requestAnimationFrame(draw1);
+      }
+      draw1();
+    }
+    
+    // Proj 2: Area line
+    const c2 = document.getElementById('projChart2')?.getContext('2d');
+    if(c2) {
+      let f = 0;
+      function draw2() {
+        c2.clearRect(0,0,280,130);
+        f += 0.03;
+        c2.beginPath();
+        c2.moveTo(0,130);
+        for(let x=0; x<=280; x+=10) {
+          const y = 80 + Math.sin(x*0.02 + f)*20 - Math.cos(x*0.01 - f)*10;
+          c2.lineTo(x, y);
+        }
+        c2.lineTo(280,130);
+        const grad = c2.createLinearGradient(0,0,0,130);
+        grad.addColorStop(0, 'rgba(167,139,250,0.6)');
+        grad.addColorStop(1, 'rgba(167,139,250,0)');
+        c2.fillStyle = grad;
+        c2.fill();
+        
+        c2.beginPath();
+        for(let x=0; x<=280; x+=10) {
+          const y = 80 + Math.sin(x*0.02 + f)*20 - Math.cos(x*0.01 - f)*10;
+          if(x===0) c2.moveTo(x,y);
+          else c2.lineTo(x,y);
+        }
+        c2.strokeStyle = '#a78bfa';
+        c2.lineWidth = 3;
+        c2.stroke();
+        
+        requestAnimationFrame(draw2);
+      }
+      draw2();
+    }
+    
+    // Proj 3: Nodes/Graph
+    const c3 = document.getElementById('projChart3')?.getContext('2d');
+    if(c3) {
+      let f = 0;
+      const nodes = Array.from({length: 15}, () => ({
+        x: Math.random()*280, y: Math.random()*130,
+        vx: (Math.random()-0.5)*1, vy: (Math.random()-0.5)*1
+      }));
+      function draw3() {
+        c3.clearRect(0,0,280,130);
+        nodes.forEach(n => {
+          n.x += n.vx; n.y += n.vy;
+          if(n.x<0||n.x>280) n.vx*=-1;
+          if(n.y<0||n.y>130) n.vy*=-1;
+        });
+        
+        c3.lineWidth = 1;
+        for(let i=0; i<nodes.length; i++) {
+          for(let j=i+1; j<nodes.length; j++) {
+            const d = Math.hypot(nodes[i].x-nodes[j].x, nodes[i].y-nodes[j].y);
+            if(d < 80) {
+              c3.strokeStyle = `rgba(52,211,153,${1 - d/80})`;
+              c3.beginPath();
+              c3.moveTo(nodes[i].x, nodes[i].y);
+              c3.lineTo(nodes[j].x, nodes[j].y);
+              c3.stroke();
+            }
+          }
+          c3.beginPath();
+          c3.arc(nodes[i].x, nodes[i].y, 3, 0, 9);
+          c3.fillStyle = '#34d399';
+          c3.fill();
+        }
+        requestAnimationFrame(draw3);
+      }
+      draw3();
+    }
+  }
+  
+  // start proj charts only when in view
+  const projObs = new IntersectionObserver(e => {
+    if(e[0].isIntersecting) {
+      initProjCharts();
+      projObs.disconnect();
+    }
+  });
+  const projSec = document.getElementById('projetos');
+  if(projSec) projObs.observe(projSec);
+
 });
 
 // Keyframe setup for spin
